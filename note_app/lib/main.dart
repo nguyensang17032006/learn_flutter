@@ -1,13 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:note_app/Model/items.dart';
 import 'package:note_app/Widget/card_model_button.dart';
 import 'package:note_app/Widget/card_widget.dart';
 
 void main() {
-  runApp(const MaterialApp(debugShowCheckedModeBanner: false, home: MyApp()));
+  runApp(MaterialApp(debugShowCheckedModeBanner: false, home: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final List<Items> items = [];
+
+  void _handleAddTask(String task) {
+    final newItem = Items(name: task, id: DateTime.now().toString());
+    setState(() {
+      items.add(newItem);
+    });
+  }
+
+  void _handleDeleteTask(String id) {
+    setState(() {
+      items.removeWhere((item) => item.id == id);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,7 +37,7 @@ class MyApp extends StatelessWidget {
         toolbarHeight: 80,
         backgroundColor: Colors.blue,
         title: const Text(
-          'My Notes App',
+          'To Do App',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -26,7 +48,17 @@ class MyApp extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: Column(children: [CardBody()]),
+        child: Column(
+          children: items
+              .map(
+                (item) => CardBody(
+                  item: item,
+                  index: items.indexOf(item),
+                  deleteTask: _handleDeleteTask,
+                ),
+              )
+              .toList(),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => {
@@ -34,7 +66,7 @@ class MyApp extends StatelessWidget {
             isScrollControlled: true,
             context: context,
             builder: (BuildContext context) {
-              return ModelButton();
+              return ModelButton(addTask: _handleAddTask);
             },
           ),
         },
